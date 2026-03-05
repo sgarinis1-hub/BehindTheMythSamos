@@ -32,14 +32,12 @@
         <button onclick="askAI()">ΣΥΝΟΜΙΛΙΑ</button>
     </div>
 
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;" vr-mode-ui="enabled: false">
-        <a-assets>
-            <a-asset-item id="pyth-model" src="https://arjs-cors-proxy.herokuapp.com/https://raw.githack.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb"></a-asset-item>
-        </a-assets>
+    <a-scene 
+    vr-mode-ui="enabled: false" 
+    embedded 
+    renderer="alpha: true; antialias: true;" 
+    arjs="sourceType: webcam; debugUIEnabled: false; videoTexture: false;">
 
-        <a-entity id="monument" gltf-model="#pyth-model" gps-entity-place="latitude: 37.7559575; longitude: 26.9763882;" scale="3 3 3" look-at="[gps-camera]"></a-entity>
-        <a-camera gps-camera rotation-reader></a-camera>
-    </a-scene>
 
     <script>
         // ----------------------------------------------------
