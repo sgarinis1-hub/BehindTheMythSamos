@@ -69,23 +69,45 @@
         <a-camera gps-camera rotation-reader></a-camera>
 
     </a-scene>
-
+        
     <script>
-        // Ενημέρωση κατάστασης όταν βρεθεί το σημείο
+        // Ενημέρωση κατάστασης όταν βρεθεί το σημείο μέσω GPS
         window.addEventListener('gps-entity-place-added', () => {
             const statusLabel = document.getElementById('status');
             statusLabel.innerText = "Το μνημείο κλείδωσε στην πλατεία!";
             statusLabel.style.color = "#00FF00";
         });
 
+        // ΑΥΤΟ ΕΙΝΑΙ ΤΟ ΝΕΟ ΚΟΜΜΑΤΙ ΓΙΑ ΝΑ ΒΛΕΠΕΙΣ ΤΗΝ ΠΑΠΙΑ ΣΤΟ ΣΠΙΤΙ:
+        window.onload = () => {
+            navigator.geolocation.getCurrentPosition((position) => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                
+                // Συντεταγμένες πλατείας
+                const platLat = 37.7559575;
+                const platLon = 26.9763882;
+
+                // Υπολογισμός αν είσαι μακριά από την πλατεία
+                const dist = Math.sqrt(Math.pow(lat - platLat, 2) + Math.pow(lon - platLon, 2));
+
+                if (dist > 0.001) { // Αν είσαι πάνω από ~100 μέτρα μακριά
+                    const entity = document.getElementById('pythagoras-monument');
+                    const statusLabel = document.getElementById('status');
+                    
+                    // Βγάζουμε το GPS και την φέρνουμε μπροστά σου
+                    entity.removeAttribute('gps-entity-place');
+                    entity.setAttribute('position', '0 -1 -5'); // 5 μέτρα μπροστά
+                    entity.setAttribute('scale', '2 2 2'); // Μικραίνουμε την κλίμακα γιατί το 20 είναι τεράστιο για το σπίτι
+                    
+                    statusLabel.innerText = "Dev Mode: Εμφάνιση στο χώρο σας";
+                    statusLabel.style.color = "#00BFFF";
+                }
+            });
+        };
+
         function startDialogue() {
-            // Δόνηση κινητού
             if (navigator.vibrate) navigator.vibrate(100);
-            
-            // Προσωρινό παράθυρο - Εδώ θα μπει η σύνδεση με ElevenLabs
-            alert("Χαίρε, ξένε! Είμαι ο Πυθαγόρας. Στέκεσαι στο Βαθύ της Σάμου, έναν τόπο γεμάτο αριθμούς και αρμονία.");
+            alert("Χαίρε, ξένε! Είμαι ο Πυθαγόρας. Σύντομα θα μιλάμε μέσω AI!");
         }
     </script>
-
-</body>
-</html>
