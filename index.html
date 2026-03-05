@@ -3,47 +3,50 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Pythagoras AR Lens</title>
+    <title>MythosGate: Pythagoras AR</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <style>
-        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
-        .ui-container {
+        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .ui-panel {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            width: 90%; z-index: 1000; text-align: center;
+            width: 90%; z-index: 1000; display: flex; flex-direction: column; gap: 10px;
         }
         #chat-bubble {
-            background: rgba(0, 0, 0, 0.85); color: #D4AF37;
-            padding: 15px; border-radius: 15px; border: 2px solid #D4AF37;
-            margin-bottom: 15px; min-height: 40px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            font-size: 16px; transition: all 0.3s;
+            background: rgba(0, 0, 0, 0.8); color: #D4AF37; padding: 15px;
+            border-radius: 15px; border: 2px solid #D4AF37; font-size: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5); min-height: 20px;
         }
-        .input-area { display: flex; gap: 10px; }
+        .input-group { display: flex; gap: 5px; }
         input {
             flex: 1; padding: 12px; border-radius: 25px; border: 1px solid #D4AF37;
             background: rgba(255,255,255,0.1); color: white; outline: none;
         }
         button {
-            padding: 12px 25px; background: #D4AF37; border: none;
+            padding: 12px 20px; background: #D4AF37; border: none;
             border-radius: 25px; color: black; font-weight: bold; cursor: pointer;
         }
     </style>
 </head>
-<body>
+<body style="margin: 0; overflow: hidden;">
 
     <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
         <a-assets>
-            <a-asset-item id="temple" src="https://raw.githack.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb"></a-asset-item>
+            <a-asset-item id="temple" src="https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/SunTemple/glTF-Binary/SunTemple.glb"></a-asset-item>
         </a-assets>
 
-        <a-entity gltf-model="#temple" position="0 -1 -5" scale="1 1 1" rotation="0 45 0"></a-entity>
+        <a-entity gltf-model="#temple" 
+                  position="0 -2 -8" 
+                  scale="0.1 0.1 0.1" 
+                  rotation="0 0 0">
+        </a-entity>
 
         <a-entity camera></a-entity>
     </a-scene>
 
-    <div class="ui-container">
-        <div id="chat-bubble">Χαίρε, αναζητητή της αλήθειας! Είμαι ο Πυθαγόρας.</div>
-        <div class="input-area">
+    <div class="ui-panel">
+        <div id="chat-bubble">Χαίρε! Είμαι ο Πυθαγόρας. Στρέψε την κάμερα στον ορίζοντα για να δεις τον ναό.</div>
+        <div class="input-group">
             <input type="text" id="userInput" placeholder="Ρώτα τον δάσκαλο...">
             <button onclick="askPythagoras()">ΣΤΕΙΛΕ</button>
         </div>
@@ -60,29 +63,28 @@
             chatBubble.innerText = "Ο Πυθαγόρας αναλογίζεται...";
             inputField.value = "";
 
-            // ΣΥΝΔΕΣΗ ΜΕ ΤΟ ΔΙΚΟ ΣΟΥ STREAMLIT URL
+            // ΤΟ URL ΤΟΥ STREAMLIT ΣΟΥ
             const brainUrl = "https://pythagorasbrain-wozrdtnnnscmhywxskhqba.streamlit.app/";
 
             try {
-                // Στέλνουμε την ερώτηση στην Python
-                const response = await fetch(brainUrl + "?q=" + encodeURIComponent(query));
+                // Χρήση corsproxy.io για να επιτραπεί η επικοινωνία μεταξύ των sites
+                const response = await fetch("https://corsproxy.io/?" + encodeURIComponent(brainUrl + "?q=" + query));
                 const text = await response.text();
 
-                // Καθαρισμός κειμένου από τυχόν HTML που βάζει το Streamlit
+                // Καθαρισμός κειμένου από τυχόν HTML tags
                 const cleanText = text.replace(/<\/?[^>]+(>|$)/g, "").trim();
-                
                 chatBubble.innerText = cleanText;
 
-                // --- ΦΩΝΗ (Text-to-Speech) ---
-                window.speechSynthesis.cancel(); // Σταμάτα αν μιλάει ήδη
+                // --- ΟΜΙΛΙΑ (Text-to-Speech) ---
+                window.speechSynthesis.cancel();
                 const msg = new SpeechSynthesisUtterance(cleanText);
                 msg.lang = 'el-GR';
                 msg.pitch = 0.9;
-                msg.rate = 0.9;
+                msg.rate = 0.85;
                 window.speechSynthesis.speak(msg);
 
             } catch (error) {
-                chatBubble.innerText = "Οι ψίθυροι των αριθμών χάθηκαν. Δοκίμασε ξανά.";
+                chatBubble.innerText = "Η σύνδεση με το άπειρο χάθηκε. Δοκίμασε ξανά.";
                 console.error(error);
             }
         }
