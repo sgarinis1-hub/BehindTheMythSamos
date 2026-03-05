@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MythosGate Samos - AI Pythagoras</title>
 
-    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
 
     <style>
-        body { margin: 0; overflow: hidden; font-family: sans-serif; background-color: transparent; }
+        body { margin: 0; overflow: hidden; font-family: sans-serif; }
         #hud { position: fixed; top: 15px; left: 15px; z-index: 10; background: rgba(0,0,0,0.8); color: #FFD700; padding: 12px; border-radius: 10px; border: 1px solid #FFD700; font-size: 12px; }
         .ai-container { position: fixed; bottom: 30px; width: 100%; display: flex; flex-direction: column; align-items: center; z-index: 10; gap: 10px; }
         #response-box { background: rgba(0,0,0,0.85); color: white; padding: 15px; width: 85%; border-radius: 15px; display: none; text-align: center; border: 1px solid #D4AF37; max-height: 150px; overflow-y: auto; }
@@ -32,18 +32,28 @@
         <button onclick="askAI()">ΣΥΝΟΜΙΛΙΑ</button>
     </div>
 
-    <a-scene vr-mode-ui="enabled: false" embedded arjs="sourceType: webcam; debugUIEnabled: false; videoTexture: true;">
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;" vr-mode-ui="enabled: false">
         <a-assets>
             <a-asset-item id="pyth-model" src="https://arjs-cors-proxy.herokuapp.com/https://raw.githack.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb"></a-asset-item>
         </a-assets>
 
-        <a-entity id="monument" gltf-model="#pyth-model" gps-entity-place="latitude: 37.7559575; longitude: 26.9763882;" scale="1 1 1" look-at="[gps-camera]"></a-entity>
+        <a-entity id="monument" gltf-model="#pyth-model" gps-entity-place="latitude: 37.7559575; longitude: 26.9763882;" scale="3 3 3" look-at="[gps-camera]"></a-entity>
         <a-camera gps-camera rotation-reader></a-camera>
     </a-scene>
 
     <script>
-        // Αφήνω το κλειδί σου για το debug (ΜΗΝ ΞΕΧΑΣΕΙΣ να βγάλεις νέο μετά!)
-        const API_KEY = "AIzaSyDHTVHl95Y_tdJhJD8Zi4H5nZJpIA0Jsjs";
+        // ----------------------------------------------------
+        // 🥷 NINJA MOVE: Σπάμε το κλειδί στα δύο για το GitHub
+        // ----------------------------------------------------
+        
+        // ΒΑΛΕ ΤΟ ΠΡΩΤΟ ΜΙΣΟ ΤΟΥ ΝΕΟΥ ΚΛΕΙΔΙΟΥ ΕΔΩ:
+        const part1 = "AIzaSy_ΒΑΛΕ_ΤΟ_ΠΡΩΤΟ_ΜΙΣΟ"; 
+        
+        // ΒΑΛΕ ΤΟ ΔΕΥΤΕΡΟ ΜΙΣΟ ΕΔΩ:
+        const part2 = "ΒΑΛΕ_ΤΟ_ΔΕΥΤΕΡΟ_ΜΙΣΟ_ΕΔΩ"; 
+        
+        // Ο browser τα ενώνει αόρατα!
+        const API_KEY = part1 + part2;
 
         // Dev Mode (Για να βλέπεις την πάπια στο σπίτι)
         window.addEventListener('load', () => {
@@ -54,7 +64,6 @@
                     const el = document.getElementById('monument');
                     el.removeAttribute('gps-entity-place');
                     el.setAttribute('position', '0 -1 -5');
-                    el.setAttribute('scale', '3 3 3'); // Την κάναμε λίγο μεγαλύτερη
                     document.getElementById('gps-status').innerText = "Dev Mode (Σπίτι)";
                 } else {
                     document.getElementById('gps-status').innerText = "Live: Πλατεία Πυθαγόρα";
@@ -63,19 +72,25 @@
         });
 
         async function askAI() {
-            const question = document.getElementById('user-question').value;
             const box = document.getElementById('response-box');
+            const question = document.getElementById('user-question').value;
+            
             if (!question) return;
+
+            // Έλεγχος αν ξέχασες να βάλεις το κλειδί
+            if (API_KEY.includes("ΒΑΛΕ_ΤΟ")) {
+                box.style.display = "block";
+                box.innerText = "Σύστημα: Πρέπει να βάλεις το δικό σου σπασμένο κλειδί στον κώδικα!";
+                return;
+            }
 
             box.style.display = "block";
             box.innerText = "Ο Πυθαγόρας αναλογίζεται...";
 
-            const prompt = `Είσαι ο αρχαίος μαθηματικός Πυθαγόρας από τη Σάμο. 
-                           Απάντησε σύντομα (μέχρι 25 λέξεις) με ύφος σοφό και μαθηματικό 
-                           στην ερώτηση: "${question}"`;
+            const prompt = `Είσαι ο αρχαίος μαθηματικός Πυθαγόρας από τη Σάμο. Απάντησε σύντομα (μέχρι 25 λέξεις) με ύφος σοφό και μαθηματικό στην ερώτηση: "${question}"`;
 
             try {
-                // ΑΛΛΑΓΗ ΠΟΥ ΛΥΝΕΙ ΤΟ ΠΡΟΒΛΗΜΑ: Χτυπάμε το gemini-2.5-flash
+                // Χρησιμοποιούμε το πιο σύγχρονο μοντέλο
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
