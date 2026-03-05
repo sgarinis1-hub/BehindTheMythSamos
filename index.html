@@ -1,17 +1,91 @@
 <!DOCTYPE html>
-<html>
+<html lang="el">
 <head>
-    <meta charset="utf-8">
-    <title>Samos AR - Restart</title>
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MythosGate Samos - AR Prototype</title>
+
+    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+    
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
+    
+    <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
+
+    <style>
+        body { margin: 0; overflow: hidden; font-family: 'Helvetica', sans-serif; }
+        
+        /* Πίνακας Ελέγχου πάνω στην οθόνη */
+        #hud {
+            position: fixed; top: 20px; left: 20px; z-index: 999;
+            background: rgba(0, 0, 0, 0.8); color: #FFD700;
+            padding: 15px; border-radius: 15px; border: 1px solid #FFD700;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+        }
+
+        .controls {
+            position: fixed; bottom: 50px; width: 100%;
+            display: flex; justify-content: center; z-index: 999;
+        }
+
+        #ai-button {
+            background: linear-gradient(135deg, #D4AF37 0%, #B8860B 100%);
+            color: white; border: none; padding: 20px 40px;
+            border-radius: 50px; font-size: 18px; font-weight: bold;
+            text-transform: uppercase; box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+            cursor: pointer; transition: 0.3s;
+        }
+    </style>
 </head>
+
 <body style="margin: 0; overflow: hidden;">
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
-        
-        <a-box position="0 0.5 -5" material="color: red;"></a-box>
-        
+
+    <div id="hud">
+        <b style="font-size: 18px;">MythosGate: ΣΑΜΟΣ</b><br>
+        <span id="status">Αναζήτηση GPS σήματος...</span>
+    </div>
+
+    <div class="controls">
+        <button id="ai-button" onclick="startDialogue()">Μίλα με τον Πυθαγόρα</button>
+    </div>
+
+    <a-scene 
+        vr-mode-ui="enabled: false"
+        embedded
+        arjs="sourceType: webcam; debugUIEnabled: false; videoTexture: true;">
+
+        <a-assets>
+            <a-asset-item id="ancient-column" src="https://raw.githack.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb"></a-asset-item>
+        </a-assets>
+
+        <a-entity 
+            id="pythagoras-monument"
+            gltf-model="#ancient-column" 
+            gps-entity-place="latitude: 37.7559575; longitude: 26.9763882;" 
+            scale="20 20 20"
+            look-at="[gps-camera]"
+            animation="property: rotation; to: 0 360 0; loop: true; dur: 20000; easing: linear">
+        </a-entity>
+
         <a-camera gps-camera rotation-reader></a-camera>
+
     </a-scene>
+
+    <script>
+        // Ενημέρωση κατάστασης όταν βρεθεί το σημείο
+        window.addEventListener('gps-entity-place-added', () => {
+            const statusLabel = document.getElementById('status');
+            statusLabel.innerText = "Το μνημείο κλείδωσε στην πλατεία!";
+            statusLabel.style.color = "#00FF00";
+        });
+
+        function startDialogue() {
+            // Δόνηση κινητού
+            if (navigator.vibrate) navigator.vibrate(100);
+            
+            // Προσωρινό παράθυρο - Εδώ θα μπει η σύνδεση με ElevenLabs
+            alert("Χαίρε, ξένε! Είμαι ο Πυθαγόρας. Στέκεσαι στο Βαθύ της Σάμου, έναν τόπο γεμάτο αριθμούς και αρμονία.");
+        }
+    </script>
+
 </body>
 </html>
