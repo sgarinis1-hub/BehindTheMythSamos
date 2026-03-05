@@ -3,73 +3,44 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Samos MythosGate - GPS Fixed</title>
-    
+    <title>Samos AR - Stable Version</title>
     <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
-    <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
-
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #000; }
-        #ui { position: fixed; top: 10px; left: 10px; z-index: 10; background: rgba(0,0,0,0.7); color: gold; padding: 10px; border-radius: 5px; font-family: sans-serif; font-size: 12px; }
-        .btn-container { position: fixed; bottom: 30px; width: 100%; text-align: center; z-index: 10; }
-        button { background: gold; border: none; padding: 15px 30px; border-radius: 30px; font-weight: bold; cursor: pointer; }
+        body { margin: 0; overflow: hidden; background: #000; }
+        #info { position: fixed; top: 10px; width: 100%; text-align: center; z-index: 10; color: gold; font-family: sans-serif; }
     </style>
 </head>
-
 <body style="margin: 0; overflow: hidden;">
 
-    <div id="ui">
-        <b>Samos AR Mode:</b> <span id="status">Αρχικοποίηση...</span>
-    </div>
-
-    <div class="btn-container">
-        <button onclick="startAI()">ΡΩΤΗΣΕ ΤΟΝ ΠΥΘΑΓΟΡΑ</button>
-    </div>
+    <div id="info">MythosGate Samos - AR Ready</div>
 
     <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false; videoTexture: true;" vr-mode-ui="enabled: false">
         
         <a-assets>
-            <a-asset-item id="pythagoras-model" src="https://arjs-cors-proxy.herokuapp.com/https://raw.githack.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb"></a-asset-item>
+            <a-asset-item id="duck" src="https://arjs-cors-proxy.herokuapp.com/https://raw.githack.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb"></a-asset-item>
         </a-assets>
 
-        <a-entity 
-            id="target-entity"
-            gltf-model="#pythagoras-model" 
-            gps-entity-place="latitude: 37.7559575; longitude: 26.9763882;" 
-            scale="15 15 15"
-            look-at="[gps-camera]">
+        <a-entity id="pyth" 
+                  gltf-model="#duck" 
+                  gps-entity-place="latitude: 37.7559575; longitude: 26.9763882;"
+                  position="0 -1 -5" 
+                  scale="1 1 1">
         </a-entity>
 
-        <a-camera gps-camera="minDistance: 0; positionMinAccuracy: 1000;" rotation-reader></a-camera>
+        <a-camera gps-camera="minDistance: 0;" rotation-reader></a-camera>
     </a-scene>
 
     <script>
-        const status = document.getElementById('status');
-        const entity = document.getElementById('target-entity');
-
-        // Έλεγχος αν είσαι στην πλατεία ή στο σπίτι χωρίς να χαλάμε το GPS
-        window.addEventListener('gps-camera-update-position', (e) => {
-            const userLat = e.detail.position.latitude;
-            const userLon = e.detail.position.longitude;
-            
-            // Απόσταση από την Πλατεία Πυθαγόρα
-            const dist = Math.sqrt(Math.pow(userLat - 37.7559575, 2) + Math.pow(userLon - 26.9763882, 2));
-
-            if (dist > 0.01) { // Αν είσαι μακριά (>~1χλμ), φέρε το μοντέλο κοντά σου για τεστ
-                status.innerText = "Dev Mode (Σπίτι)";
-                entity.removeAttribute('gps-entity-place');
-                entity.setAttribute('position', '0 -1 -5');
-                entity.setAttribute('scale', '1 1 1');
-            } else {
-                status.innerText = "Live Mode (Πλατεία)";
-                status.style.color = "lime";
-            }
-        });
-
-        function startAI() {
-            alert("Ετοιμάζουμε το μυαλό του Πυθαγόρα...");
-        }
+        // Αντί για watchPosition που κολλάει, κάνουμε ένα απλό check στο τέλος
+        window.onload = () => {
+            navigator.geolocation.getCurrentPosition((p) => {
+                console.log("GPS OK");
+            }, (err) => {
+                // Αν το GPS αποτύχει (είσαι μέσα στο σπίτι), το μοντέλο θα μείνει στο position="0 -1 -5"
+                document.querySelector('#info').innerText = "Dev Mode - Μοντέλο μπροστά σου";
+            });
+        };
     </script>
 </body>
 </html>
