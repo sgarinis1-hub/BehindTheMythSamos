@@ -1,4 +1,4 @@
-⁰<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="el">
 <head>
     <meta charset="UTF-8">
@@ -42,8 +42,8 @@
     </a-scene>
 
     <script>
-        const API_KEY =
- "AIzaSyDHTVHl95Y_tdJhJD8Zi4H5nZJpIA0Jsjs";
+        // ΠΡΟΣΟΧΗ: Το κλειδί είναι προσωρινό για το debug.
+        const API_KEY = "AIzaSyDHTVHl95Y_tdJhJD8Zi4H5nZJpIA0Jsjs";
 
         // Dev Mode Fix
         window.addEventListener('load', () => {
@@ -81,10 +81,19 @@
                 });
 
                 const data = await response.json();
+
+                // ΝΕΟΣ ΕΛΕΓΧΟΣ: Αν η Google ρίξει "άκυρο", δείξε μας τον λόγο!
+                if (!response.ok) {
+                    console.error("Google API Error:", data);
+                    box.innerText = "Σφάλμα Google: " + (data.error?.message || "Άγνωστο λάθος");
+                    return;
+                }
+
                 const answer = data.candidates[0].content.parts[0].text;
                 box.innerText = answer;
             } catch (err) {
-                box.innerText = "Οι θεοί των αριθμών σιωπούν (Σφάλμα σύνδεσης).";
+                // Αν κρασάρει ο browser ή δεν έχεις ίντερνετ
+                box.innerText = "Σφάλμα Κώδικα/Δικτύου: " + err.message;
             }
         }
     </script>
