@@ -2,45 +2,16 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Samos AR - Stable Version</title>
-    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+    <title>Samos AR - Restart</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <style>
-        body { margin: 0; overflow: hidden; background: #000; }
-        #info { position: fixed; top: 10px; width: 100%; text-align: center; z-index: 10; color: gold; font-family: sans-serif; }
-    </style>
 </head>
 <body style="margin: 0; overflow: hidden;">
-
-    <div id="info">MythosGate Samos - AR Ready</div>
-
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false; videoTexture: true;" vr-mode-ui="enabled: false">
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
         
-        <a-assets>
-            <a-asset-item id="duck" src="https://arjs-cors-proxy.herokuapp.com/https://raw.githack.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb"></a-asset-item>
-        </a-assets>
-
-        <a-entity id="pyth" 
-                  gltf-model="#duck" 
-                  gps-entity-place="latitude: 37.7559575; longitude: 26.9763882;"
-                  position="0 -1 -5" 
-                  scale="1 1 1">
-        </a-entity>
-
-        <a-camera gps-camera="minDistance: 0;" rotation-reader></a-camera>
+        <a-box position="0 0.5 -5" material="color: red;"></a-box>
+        
+        <a-camera gps-camera rotation-reader></a-camera>
     </a-scene>
-
-    <script>
-        // Αντί για watchPosition που κολλάει, κάνουμε ένα απλό check στο τέλος
-        window.onload = () => {
-            navigator.geolocation.getCurrentPosition((p) => {
-                console.log("GPS OK");
-            }, (err) => {
-                // Αν το GPS αποτύχει (είσαι μέσα στο σπίτι), το μοντέλο θα μείνει στο position="0 -1 -5"
-                document.querySelector('#info').innerText = "Dev Mode - Μοντέλο μπροστά σου";
-            });
-        };
-    </script>
 </body>
 </html>
