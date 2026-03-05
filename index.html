@@ -3,86 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MythosGate Samos - AI Pythagoras</title>
+    <title>MythosGate Samos - Chat Head AI</title>
 
     <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
+
     <style>
         body { margin: 0; overflow: hidden; font-family: sans-serif; }
         #hud { position: fixed; top: 15px; left: 15px; z-index: 10; background: rgba(0,0,0,0.8); color: #FFD700; padding: 12px; border-radius: 10px; border: 1px solid #FFD700; font-size: 12px; }
         
-        /* Η απόλυτη διόρθωση για το κεντράρισμα */
-        .ai-container { 
-            position: fixed; 
-            bottom: 30px; 
-            left: 0; /* Αυτό έλειπε και το έστελνε αριστερά! */
-            width: 100%; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
+        /* -------------------------------------
+           ΤΟ CHAT HEAD (Η Φούσκα του Messenger)
+           ------------------------------------- */
+        #chat-head {
+            position: fixed;
+            bottom: 30px;
+            right: 20px;
+            width: 65px;
+            height: 65px;
+            background: #D4AF37;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
             justify-content: center;
-            z-index: 9999; /* Το βάζουμε πάνω από όλα */
-            gap: 10px; 
+            font-size: 35px;
+            z-index: 10000;
+            cursor: pointer;
+            border: 3px solid white;
+            transition: transform 0.2s;
+        }
+        #chat-head:active { transform: scale(0.9); }
+
+        /* -------------------------------------
+           ΤΟ ΑΝΑΔΥΟΜΕΝΟ ΠΑΡΑΘΥΡΟ (Chat Window)
+           ------------------------------------- */
+        #chat-window {
+            position: fixed;
+            bottom: 110px; /* Πάνω από τη φούσκα */
+            left: 5%;
+            width: 90%;
+            background: rgba(0,0,0,0.85);
+            border-radius: 15px;
+            border: 2px solid #D4AF37;
+            display: none; /* Κρυμμένο στην αρχή */
+            flex-direction: column;
+            z-index: 9999;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        .chat-header {
+            background: #D4AF37;
+            color: black;
+            padding: 10px 15px;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-btn {
+            background: none; border: none; font-size: 20px; font-weight: bold; cursor: pointer; color: black;
+        }
+
+        #chat-history {
+            height: 40vh; /* Υψος του chat */
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* Τα συννεφάκια */
+        .msg { padding: 10px 15px; border-radius: 15px; max-width: 85%; line-height: 1.4; font-size: 15px; }
+        
+        .msg-user { 
+            background: #D4AF37; color: black; 
+            align-self: flex-end; 
+            border-bottom-right-radius: 0; 
+            font-weight: bold;
         }
         
-        #response-box { 
-            box-sizing: border-box;
-            background: rgba(0,0,0,0.85); color: white; padding: 15px; width: 90%; 
-            border-radius: 15px; display: none; text-align: center; 
-            border: 1px solid #D4AF37; max-height: 150px; overflow-y: auto; 
+        .msg-ai { 
+            background: rgba(40,40,40,0.9); color: white; 
+            align-self: flex-start; 
+            border-bottom-left-radius: 0; 
+            border: 1px solid rgba(212, 175, 55, 0.5);
         }
-        
+
+        .play-btn {
+            background: none; border: none; color: #D4AF37;
+            font-size: 22px; cursor: pointer; padding: 5px 0 0 0;
+            display: block; width: 100%; text-align: right; margin-top: 5px; border-top: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .input-area {
+            display: flex; padding: 10px; background: rgba(0,0,0,0.5); border-bottom-left-radius: 15px; border-bottom-right-radius: 15px; gap: 8px;
+        }
+
         input { 
-            box-sizing: border-box; /* Για να μην ξεχειλώνει */
-            padding: 15px; border-radius: 25px; border: 2px solid #D4AF37; 
-            width: 85%; font-size: 16px; outline: none; text-align: center; 
+            flex: 1; padding: 12px; border-radius: 20px; 
+            border: 1px solid #D4AF37; font-size: 16px; outline: none; background: white;
         }
         
-        button { 
-            background: #D4AF37; color: black; border: none; padding: 15px 35px; 
-            border-radius: 30px; font-weight: bold; cursor: pointer; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
+        button.send-btn { 
+            background: #D4AF37; color: black; border: none; padding: 0 20px; 
+            border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 18px;
         }
     </style>
-
 </head>
 
-<body style="margin: 0; overflow: hidden;">
+<body>
 
     <div id="hud">
         <b>MythosGate: ΣΑΜΟΣ</b><br>
         <span id="gps-status">Αναζήτηση GPS...</span>
     </div>
 
-    <div class="ai-container">
-        <div id="response-box"></div>
-        <input type="text" id="user-question" placeholder="Ρώτησε τον Πυθαγόρα...">
-        <button onclick="askAI()">ΣΥΝΟΜΙΛΙΑ</button>
+    <div id="chat-head" onclick="toggleChat()">
+        🏛️
     </div>
 
-    <a-scene 
-    vr-mode-ui="enabled: false" 
-    embedded 
-    renderer="alpha: true; antialias: true;" 
-    arjs="sourceType: webcam; debugUIEnabled: false; videoTexture: false;">
+    <div id="chat-window">
+        <div class="chat-header">
+            <span>Συνομιλία με Πυθαγόρα</span>
+            <button class="close-btn" onclick="toggleChat()">✖</button>
+        </div>
+        
+        <div id="chat-history">
+            <div class="msg msg-ai">Χαίρε! Πάτησε το ηχειάκι από κάτω για να με ακούσεις, ή γράψε μου την ερώτησή σου.
+                <button class="play-btn" onclick="speakGreek('Χαίρε! Πάτησε το ηχειάκι από κάτω για να με ακούσεις, ή γράψε μου την ερώτησή σου.')">🔊</button>
+            </div>
+        </div>
+        
+        <div class="input-area">
+            <input type="text" id="user-question" placeholder="Ρώτα τον Πυθαγόρα...">
+            <button class="send-btn" onclick="askAI()">🚀</button>
+        </div>
+    </div>
 
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;" vr-mode-ui="enabled: false">
+        <a-assets>
+            <a-asset-item id="pyth-model" src="https://arjs-cors-proxy.herokuapp.com/https://raw.githack.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb"></a-asset-item>
+        </a-assets>
+
+        <a-entity id="monument" gltf-model="#pyth-model" gps-entity-place="latitude: 37.7559575; longitude: 26.9763882;" scale="3 3 3" look-at="[gps-camera]"></a-entity>
+        <a-camera gps-camera rotation-reader></a-camera>
+    </a-scene>
 
     <script>
-        // ----------------------------------------------------
-        // 🥷 NINJA MOVE: Σπάμε το κλειδί στα δύο για το GitHub
-        // ----------------------------------------------------
-        
-        // ΒΑΛΕ ΤΟ ΠΡΩΤΟ ΜΙΣΟ ΤΟΥ ΝΕΟΥ ΚΛΕΙΔΙΟΥ ΕΔΩ:
-        const part1 = "AIzaSyBL4TvVPQYqY"; 
-        
-        // ΒΑΛΕ ΤΟ ΔΕΥΤΕΡΟ ΜΙΣΟ ΕΔΩ:
-        const part2 = "7skvdZXqRaddrVVR4fmqBI"; 
-        
-        // Ο browser τα ενώνει αόρατα!
+        // 🥷 NINJA MOVE: ΒΑΛΕ ΕΔΩ ΤΟ ΚΛΕΙΔΙ ΣΟΥ
+        const part1 = "AIzaSyBL4TvVPQYqY";
+
+        const part2 = "7skvdZXqRaddrVVR4fmqBI";
         const API_KEY = part1 + part2;
 
-        // Dev Mode (Για να βλέπεις την πάπια στο σπίτι)
         window.addEventListener('load', () => {
             navigator.geolocation.getCurrentPosition((pos) => {
                 const platLat = 37.7559575;
@@ -98,27 +177,74 @@
             });
         });
 
-        async function askAI() {
-            const box = document.getElementById('response-box');
-            const question = document.getElementById('user-question').value;
+        // ΑΝΟΙΓΕΙ / ΚΛΕΙΝΕΙ ΤΟ CHAT
+        function toggleChat() {
+            const chatWindow = document.getElementById('chat-window');
+            if (chatWindow.style.display === 'flex') {
+                chatWindow.style.display = 'none';
+            } else {
+                chatWindow.style.display = 'flex';
+                // Σκρολάρει αυτόματα κάτω όταν το ανοίγεις
+                const history = document.getElementById('chat-history');
+                history.scrollTop = history.scrollHeight;
+            }
+        }
+
+        // Η ΦΩΝΗ
+        function speakGreek(text) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'el-GR'; 
+            utterance.rate = 0.95; 
+            utterance.pitch = 0.8; 
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function appendMessage(sender, text, isThinking = false) {
+            const chatHistory = document.getElementById('chat-history');
+            const msgDiv = document.createElement('div');
+            msgDiv.classList.add('msg');
             
+            if (sender === 'user') {
+                msgDiv.classList.add('msg-user');
+                msgDiv.innerText = text;
+            } else {
+                msgDiv.classList.add('msg-ai');
+                if (isThinking) {
+                    msgDiv.id = "thinking-msg";
+                    msgDiv.style.fontStyle = "italic";
+                    msgDiv.style.color = "#aaa";
+                    msgDiv.innerText = text;
+                } else {
+                    msgDiv.innerHTML = `
+                        <span>${text}</span>
+                        <button class="play-btn" onclick="speakGreek(\`${text.replace(/"/g, '&quot;')}\`)">🔊</button>
+                    `;
+                }
+            }
+            
+            chatHistory.appendChild(msgDiv);
+            chatHistory.scrollTop = chatHistory.scrollHeight; 
+        }
+
+        async function askAI() {
+            const inputField = document.getElementById('user-question');
+            const question = inputField.value.trim();
             if (!question) return;
 
-            // Έλεγχος αν ξέχασες να βάλεις το κλειδί
+            appendMessage('user', question);
+            inputField.value = ''; 
+
             if (API_KEY.includes("ΒΑΛΕ_ΤΟ")) {
-                box.style.display = "block";
-                box.innerText = "Σύστημα: Πρέπει να βάλεις το δικό σου σπασμένο κλειδί στον κώδικα!";
+                appendMessage('ai', "Σύστημα: Πρέπει να βάλεις το δικό σου σπασμένο κλειδί στον κώδικα!");
                 return;
             }
 
-            box.style.display = "block";
-            box.innerText = "Ο Πυθαγόρας αναλογίζεται...";
+            appendMessage('ai', "Ο Πυθαγόρας αναλογίζεται...", true);
 
-            const prompt = `Είσαι ο αρχαίος Έλληνας φιλόσοφος και μαθηματικός, Πυθαγόρας ο Σάμιος. Ο χρήστης σου κάνει μια ερώτηση. Θέλω να απαντήσεις ΑΜΕΣΑ και ΞΕΚΑΘΑΡΑ σε αυτό που σε ρωτάει, χωρίς να μιλάς με γρίφους. Να είσαι φιλικός, σαν ένας καλός δάσκαλος που εξηγεί τα πράγματα απλά. Μπορείς να χρησιμοποιείς παραδείγματα από τα μαθηματικά, τη μουσική ή τη γεωμετρία για να εξηγήσεις τη σκέψη σου, αλλά η προτεραιότητά σου είναι να δώσεις μια σωστή και κατανοητή απάντηση. Μίλα ελεύθερα, σε 2 με 4 προτάσεις (όχι πολύ τεράστια κείμενα, αλλά ούτε και μονολεκτικά). Η ερώτηση του χρήστη είναι: "${question}"`;
-
+            const prompt = `Είσαι το πάνσοφο πνεύμα του αρχαίου Έλληνα φιλοσόφου Πυθαγόρα του Σάμιου, το οποίο έχει έρθει στο σήμερα. Γνωρίζεις τα ΠΑΝΤΑ για τον σύγχρονο κόσμο, την τεχνολογία, και τη σύγχρονη ιστορία της Σάμου. Όταν σε ρωτούν για σύγχρονα θέματα, απάντησε κανονικά, δείχνοντας ότι τα γνωρίζεις, αλλά χρησιμοποίησε τη φιλοσοφία σου (αριθμοί, γεωμετρία, αρμονία) για να τα εξηγήσεις. Απάντησε ΑΜΕΣΑ και ΞΕΚΑΘΑΡΑ στην ερώτηση: "${question}". Να είσαι φιλικός, σαν δάσκαλος, και να απαντάς σε 2 με 4 προτάσεις.`;
 
             try {
-                // Χρησιμοποιούμε το πιο σύγχρονο μοντέλο
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -126,17 +252,23 @@
                 });
 
                 const data = await response.json();
+                
+                document.getElementById('thinking-msg').remove();
 
                 if (!response.ok) {
-                    console.error("Google API Error:", data);
-                    box.innerText = "Σφάλμα Google: " + (data.error?.message || "Άγνωστο λάθος");
+                    appendMessage('ai', "Σφάλμα: " + (data.error?.message || "Άγνωστο λάθος"));
                     return;
                 }
 
                 const answer = data.candidates[0].content.parts[0].text;
-                box.innerText = answer;
+                appendMessage('ai', answer);
+
+                // Ξεκινάει να μιλάει αυτόματα στην πρώτη απάντηση
+                speakGreek(answer);
+
             } catch (err) {
-                box.innerText = "Σφάλμα Δικτύου: " + err.message;
+                document.getElementById('thinking-msg')?.remove();
+                appendMessage('ai', "Οι θεοί σιωπούν (Σφάλμα Δικτύου).");
             }
         }
     </script>
